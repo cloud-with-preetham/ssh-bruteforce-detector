@@ -1,137 +1,129 @@
-```md
-# 🚨 SSH Brute Force Detector (UFW)
+# 🚨 SSH Brute Force Detector
 
-A **Blue Team** Bash project that detects **failed SSH login attempts** from Linux logs and automatically blocks suspicious IPs using **UFW**.
+Automated threat detection tool that monitors SSH login attempts and blocks malicious IPs using UFW firewall.
 
-This project helps you practice:
-- Linux log analysis (`/var/log/auth.log`)
-- Basic threat detection (brute force patterns)
-- Automated response using firewall rules (UFW)
+## 📋 Overview
 
----
+A Blue Team security tool that analyzes Linux authentication logs to detect SSH brute force attacks and automatically blocks suspicious IPs exceeding a configurable threshold.
 
 ## ✅ Features
 
-- Detects **failed SSH password attempts**
-- Shows **Top attacker IPs**
-- Blocks IPs that cross a defined threshold
-- Prevents duplicate blocking
-- Saves blocked IPs to a local file (`blocked_ips.txt`)
-
----
+- Detects failed SSH password attempts from `/var/log/auth.log`
+- Identifies top attacker IPs with attempt counts
+- Automatically blocks IPs exceeding threshold using UFW
+- Prevents duplicate blocking with persistent tracking
+- Logs all blocked IPs to `blocked_ips.txt`
 
 ## 🛠️ Requirements
 
-- Linux system with:
-  - `openssh-server`
-  - `ufw`
-  - SSH logs available in `/var/log/auth.log`
-
-> ⚠️ Some systems store logs in `/var/log/secure` (CentOS/RHEL).
-
----
+- Linux system (Ubuntu/Debian/RHEL/CentOS)
+- `openssh-server` installed
+- `ufw` firewall installed and enabled
+- Root/sudo access
+- SSH logs in `/var/log/auth.log` (or `/var/log/secure` on RHEL)
 
 ## 📂 Project Structure
 
 ```
-
 ssh-bruteforce-detector/
-│── ssh_bruteforce_detector.sh
-│── blocked_ips.txt
-│── README.md
-
-````
-
----
-
-## 🚀 Setup & Run
-
-### 1️⃣ Make script executable
-```bash
-chmod +x ssh_bruteforce_detector.sh
-````
-
-### 2️⃣ Run with sudo
-
-```bash
-sudo ./ssh_bruteforce_detector.sh
+├── ssh-bruteforce-detector.sh
+├── blocked_ips.txt
+└── README.md
 ```
 
----
+## 🚀 Usage
 
-## ⚙️ Configuration
-
-Inside the script you can change:
+### Run the Detector
 
 ```bash
-THRESHOLD=5
+chmod +x ssh-bruteforce-detector.sh
+sudo ./ssh-bruteforce-detector.sh
 ```
 
-Meaning: any IP with **more than 5 failed attempts** will be blocked.
+### Configure Threshold
 
----
+Edit the script to adjust sensitivity:
 
-## 📌 Example Output
+```bash
+THRESHOLD=5  # Block IPs with more than 5 failed attempts
+```
+
+### Sample Output
 
 ```
+=========================================
+   🚨 SSH Brute Force Detector
+=========================================
+[INFO] Reading SSH logs from: /var/log/auth.log
+[INFO] Threshold for blocking: more than 5 failed attempts
+
 📌 Top IPs with failed SSH attempts:
-12  192.168.1.50
-7   45.33.12.10
-3   10.0.0.2
+-----------------------------------
+     12 192.168.1.50
+      7 45.33.12.10
+      3 10.0.0.2
 
 ⚠️ Suspicious IPs (above threshold):
+-----------------------------------
 45.33.12.10
 
 🧱 Blocking IPs using UFW...
+-----------------------------------
 [BLOCKED] 45.33.12.10 blocked successfully.
 
+✅ Blocking complete.
 📌 Blocked IPs saved in: blocked_ips.txt
+=========================================
 ```
 
----
+## 🔓 Unblock an IP
 
-## 🔓 How to Unblock an IP (UFW)
-
-### View firewall rules:
+### View current firewall rules
 
 ```bash
 sudo ufw status numbered
 ```
 
-### Delete a rule:
+### Delete a specific rule
 
 ```bash
 sudo ufw delete <rule_number>
 ```
 
----
+### Remove from tracking file
 
-## ⚠️ Warning (Important)
-
-Do **NOT** run auto-blocking on a remote server unless you are sure you won't block:
-
-* Your own IP
-* Your company VPN IP
-* Your admin jumpbox IP
-
-Best practice: whitelist your own IP before enabling auto-block rules.
-
----
-
-## 📌 Future Improvements (Ideas)
-
-* Export report to a timestamped file
-* Support both `/var/log/auth.log` and `/var/log/secure`
-* Detect invalid users (`Invalid user`)
-* Auto-block using `fail2ban` integration
-* Send alerts via Telegram/Email
-
----
-
-## 👨‍💻 Author
-
-**Preetham Pereira**
-Cybersecurity & Cloud Security Learner
-
+```bash
+sed -i '/IP_ADDRESS/d' blocked_ips.txt
 ```
+
+## ⚠️ Important Warning
+
+**Do NOT run on production servers without whitelisting your own IP first!**
+
+```bash
+# Whitelist your IP before running
+sudo ufw allow from YOUR_IP to any
 ```
+
+Risk: You may accidentally block yourself or legitimate admin IPs.
+
+## 🎯 Use Cases
+
+- Real-time SSH attack detection
+- Automated incident response
+- Security monitoring and logging
+- Blue Team training exercises
+- DevSecOps automation pipelines
+
+## 🔮 Future Enhancements
+
+- Support for both `/var/log/auth.log` and `/var/log/secure`
+- Detect invalid user attempts
+- Integration with fail2ban
+- Email/Telegram alerts for blocked IPs
+- Timestamped reports and analytics
+- Whitelist management
+
+## 📝 License
+
+MIT
